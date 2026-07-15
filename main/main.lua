@@ -1,4 +1,4 @@
-local Config = shared.Glory
+local Config = shared.Story
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
