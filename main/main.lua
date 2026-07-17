@@ -3,30 +3,32 @@ local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 
-local NORMAL_SPEED = 16
-local BOOST_SPEED = 700
+local Config = shared.Story
 
-local KEY = Enum.KeyCode.V -- Change this key
+local WalkSpeedConfig = Config.Character.WalkSpeed
+local Keybind = Config.General.HotKeys.WalkSpeed
 
 local enabled = false
+
+local function getKey()
+	return Enum.KeyCode[Keybind]
+end
 
 local function setupCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
 
-	humanoid.WalkSpeed = NORMAL_SPEED
+	humanoid.WalkSpeed = WalkSpeedConfig.Default
 
-	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then return end
-		
-		if input.KeyCode == KEY then
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then return end
+
+		if input.KeyCode == getKey() then
 			enabled = not enabled
 
-			if enabled then
-				humanoid.WalkSpeed = BOOST_SPEED
-				print("WalkSpeed ON")
+			if enabled and WalkSpeedConfig.Enabled then
+				humanoid.WalkSpeed = WalkSpeedConfig.Value
 			else
-				humanoid.WalkSpeed = NORMAL_SPEED
-				print("WalkSpeed OFF")
+				humanoid.WalkSpeed = WalkSpeedConfig.Default
 			end
 		end
 	end)
