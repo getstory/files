@@ -4,7 +4,35 @@ if not LPH_OBFUSCATED then
     LPH_ENCFUNC = function(...) return ... end
     LPH_CRASH = function() end
 end
- 
+
+local HttpService = game:GetService("HttpService")
+
+local SaveFile = "StoryBinds.json"
+
+-- Load saved binds
+if isfile(SaveFile) then
+    local Saved = HttpService:JSONDecode(readfile(SaveFile))
+
+    for Name, Key in pairs(Saved) do
+        shared.Story.Binds[Name] = Key
+    end
+end
+
+local OldBinds = shared.Story.Binds
+
+shared.Story.Binds = setmetatable({}, {
+    __index = OldBinds,
+
+    __newindex = function(self, key, value)
+        OldBinds[key] = value
+
+        writefile(
+            SaveFile,
+            HttpService:JSONEncode(OldBinds)
+        )
+    end
+})
+
 local Players = game:GetService("Players")
 local Workspace = game.Workspace
 local RunService = game:GetService("RunService")
