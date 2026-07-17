@@ -1,4 +1,4 @@
-shared.Saved = {
+shared.Story = {
     ['Selection'] = {
         ['Selection Mode'] = 'Target', -- target auto
     
@@ -113,7 +113,7 @@ shared.Saved = {
         ['Enabled'] = true,
         ['Multiplier'] = 11.5,
  
-        ['Headless'] = true,
+        ['Headless'] = false,
         ['Anti Trip'] = true,
     },
  
@@ -127,7 +127,7 @@ shared.Saved = {
     },
  
     ['Skin Changer'] = {
-        ['Enabled'] = true,
+        ['Enabled'] = false,
         ['Skins'] = {
             ['[Double-Barrel SG]'] = 'Galaxy',
             ['[Revolver]'] = 'Galaxy',
