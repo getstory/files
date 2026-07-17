@@ -182,5 +182,4 @@ shared.Story = {
         ['enabled'] = false,
         ['remove face accessories'] = true,
     },
-  },
 }
