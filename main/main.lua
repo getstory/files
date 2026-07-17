@@ -1004,7 +1004,7 @@ end
             end
  
             local function GetTriggerBotFOVSize()
-    local cfg = shared.Saved.TriggerBot.FOV.FOV['Weapon Configuration']
+    local cfg = shared.Story.TriggerBot.FOV.FOV['Weapon Configuration']
     local tool = Self.Character and Self.Character:FindFirstChildOfClass("Tool")
     local name = tool and tool.Name or ""
  
@@ -1235,8 +1235,8 @@ end
                         end
         
                         -- Get current mode and checks
-                        local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-                        local checks = shared.Saved.Selection.Checks[selectionMode] or shared.Saved.Selection.Checks.Auto
+                        local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+                        local checks = shared.Story.Selection.Checks[selectionMode] or shared.Story.Selection.Checks.Auto
                         
                         if checks.Test then
                             if not Engine.RayCast(Player.Character.HumanoidRootPart, GetOrigin('Camera'), {Self.Character}) then
@@ -1263,7 +1263,7 @@ end
                         end
         
                         -- Distance Check
-                        local distanceConfig = shared.Saved['Distance Check']
+                        local distanceConfig = shared.Story['Distance Check']
                         if distanceConfig and distanceConfig.Enabled then
                             local maxDistance = distanceConfig['Max Distance'] or 300
                             local playerDistance = (Self.Character.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
@@ -1295,7 +1295,7 @@ end
                 local MousePosition = UserInputService:GetMouseLocation()
                 
                 -- Get allowed hitparts from config
-                local AllowedParts = shared.Saved.SilentAim.Hitpart or { 'Head', 'HumanoidRootPart' }
+                local AllowedParts = shared.Story.SilentAim.Hitpart or { 'Head', 'HumanoidRootPart' }
                 
                 local ClosestPart = nil
                 local ClosestDistance = 1/0
@@ -1547,7 +1547,7 @@ end
             end
             
             local function AutomatedPrediction()
-                local silentAimSettings = shared.Saved
+                local silentAimSettings = shared.Story
                 local TargetPlayerData = Mango.Locals.SilentAimTarget
             
                 local silentAimTarget = TargetPlayerData
@@ -1605,7 +1605,7 @@ end
                 local CurrentCamera = Workspace.CurrentCamera
                 local MousePosition = UserInputService:GetMouseLocation()
                 
-                local AllowedParts = shared.Saved['Aim Assist'].Hitpart or { 'Head', 'HumanoidRootPart' }
+                local AllowedParts = shared.Story['Aim Assist'].Hitpart or { 'Head', 'HumanoidRootPart' }
                 
                 local ClosestPart = nil
                 local ClosestDistance = 1/0
@@ -1637,7 +1637,7 @@ end
         
         local TargetPosition = TargetPart.Position
  
-        if shared.Saved['Aim Assist'].Prediction.Enabled then
+        if shared.Story['Aim Assist'].Prediction.Enabled then
             local RootPart = Mango.Locals.AimAssistTarget.Character.HumanoidRootPart
             local Velocity
             if typeof(IsDesynced) == "function" and typeof(Resolve) == "function" then
@@ -1646,9 +1646,9 @@ end
                 Velocity = RootPart.Velocity
             end
             local PredictionVector = Vector3.new(
-                shared.Saved['Aim Assist'].Prediction.X,
-                shared.Saved['Aim Assist'].Prediction.Y,
-                shared.Saved['Aim Assist'].Prediction.Z
+                shared.Story['Aim Assist'].Prediction.X,
+                shared.Story['Aim Assist'].Prediction.Y,
+                shared.Story['Aim Assist'].Prediction.Z
             )
             return TargetPosition + Velocity * PredictionVector
         else
@@ -1666,7 +1666,7 @@ end
         
         local TargetPosition = TargetPart.Position
  
-        if shared.Saved.SilentAim.Prediction.Enabled then
+        if shared.Story.SilentAim.Prediction.Enabled then
             local RootPart = Mango.Locals.SilentAimTarget.Character.HumanoidRootPart
             local Velocity
             if typeof(IsDesynced) == "function" and typeof(Resolve) == "function" then
@@ -1676,9 +1676,9 @@ end
             end
  
             local PredictionVector = Vector3.new(
-                shared.Saved.SilentAim.Prediction.X,
-                shared.Saved.SilentAim.Prediction.Y,
-                shared.Saved.SilentAim.Prediction.Z
+                shared.Story.SilentAim.Prediction.X,
+                shared.Story.SilentAim.Prediction.Y,
+                shared.Story.SilentAim.Prediction.Z
             )
  
             Mango.Locals.HitPosition = TargetPosition + Velocity * PredictionVector
@@ -2360,12 +2360,12 @@ end
     local centerY = screenSize.Y / 2
  
     -- Check if combined FOV should be visible
-    local fovConfig = shared.Saved and shared.Saved.Fov
+    local fovConfig = shared.Story and shared.Story.Fov
     local fovEnabled = fovConfig and fovConfig.Enabled and fovConfig.Visible
  
     -- Show FOV if enabled and either Silent Aim or Aim Assist is enabled
-    local silentAimEnabled = shared.Saved and shared.Saved.SilentAim and shared.Saved.SilentAim.Enabled
-    local aimAssistEnabled = shared.Saved and shared.Saved['Aim Assist'] and shared.Saved['Aim Assist'].Enabled
+    local silentAimEnabled = shared.Story and shared.Story.SilentAim and shared.Story.SilentAim.Enabled
+    local aimAssistEnabled = shared.Story and shared.Story['Aim Assist'] and shared.Story['Aim Assist'].Enabled
  
     -- Determine FOV size: use config if enabled and visible, otherwise use 2000 (full screen)
     local fovSize = (fovEnabled and fovConfig.Size) or 2000
@@ -2425,7 +2425,7 @@ end
             local Ticks = {}
             local SGTick = tick()
             local function SilentAim(Tool)
-                if shared.Saved.SilentAim.Enabled and Tool:FindFirstChild("Ammo") then
+                if shared.Story.SilentAim.Enabled and Tool:FindFirstChild("Ammo") then
                     if CurrentGame.Name == "Da Hood" then
                         if not Ticks[Tool.Name] then
                             Ticks[Tool.Name] = 0
@@ -2509,7 +2509,7 @@ end
                                         SpreadZ = math.random() > 0.5 and math.random() * 0.05 or -math.random() * 0.05
             
                                         -- Apply Spread Modification
-                                        local spreadConfig = shared.Saved['Spread Modification']
+                                        local spreadConfig = shared.Story['Spread Modification']
                                         if spreadConfig and spreadConfig.Enabled and spreadConfig.Guns then
                                             local spreadMultiplier = spreadConfig.Guns[Tool.Name]
                                             if spreadMultiplier ~= nil then
@@ -2551,7 +2551,7 @@ end
                                     Ticks[Tool.Name] = tick()
                                     local HitPosition = Mango.Locals.HitPosition 
                                     -- Check Double Tap config
-                                    local doubleTapConfig = shared.Saved['Double Tap']
+                                    local doubleTapConfig = shared.Story['Double Tap']
                                     local isDoubleTapGun = false
                                     if doubleTapConfig and doubleTapConfig.Enabled then
                                         for _, gunName in ipairs(doubleTapConfig.Guns or {}) do
@@ -2635,7 +2635,7 @@ end
                                                 SpreadZ = math.random() > 0.5 and math.random() * 0.05 or -math.random() * 0.05
             
                                                 -- Apply Spread Modification
-                                                local spreadConfig = shared.Saved['Spread Modification']
+                                                local spreadConfig = shared.Story['Spread Modification']
                                                 if spreadConfig and spreadConfig.Enabled and spreadConfig.Guns then
                                                     local spreadMultiplier = spreadConfig.Guns[Tool.Name]
                                                     if spreadMultiplier ~= nil then
@@ -2790,8 +2790,8 @@ end
                         local function shouldShoot(target)
                             local allConditionsPassed = true
                             -- Get current mode and checks
-                            local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-                            local conditions = shared.Saved.Selection.Checks[selectionMode] or shared.Saved.Selection.Checks.Auto
+                            local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+                            local conditions = shared.Story.Selection.Checks[selectionMode] or shared.Story.Selection.Checks.Auto
             
                             if conditions.Test and not Engine.RayCast(target.HumanoidRootPart, Player.GetOrigin('Camera'), {Self.Character}) then
                                 allConditionsPassed = false
@@ -2828,7 +2828,7 @@ end
                             local DistanceX = math.abs(screen.X - Mouse.X)
                             local DistanceY = math.abs(screen.Y - Mouse.Y)
                             -- Always use Circle FOV
-                            local fovSize = shared.Saved.Fov and shared.Saved.Fov.Size or 150
+                            local fovSize = shared.Story.Fov and shared.Story.Fov.Size or 150
                             local DistanceFromCenterSq = DistanceX^2 + DistanceY^2
                             
                             -- Check if target is within FOV circle (distance from mouse cursor)
@@ -2849,8 +2849,8 @@ end
                         local function shouldShoot(target)
                             local allConditionsPassed = true
                             -- Get current mode and checks
-                            local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-                            local conditions = shared.Saved.Selection.Checks[selectionMode] or shared.Saved.Selection.Checks.Auto
+                            local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+                            local conditions = shared.Story.Selection.Checks[selectionMode] or shared.Story.Selection.Checks.Auto
             
                             if conditions.Test and not Engine.RayCast(target.HumanoidRootPart, Player.GetOrigin('Camera'), {Self.Character}) then
                                 allConditionsPassed = false
@@ -2886,7 +2886,7 @@ end
                             local DistanceX = math.abs(screen.X - Mouse.X)
                             local DistanceY = math.abs(screen.Y - Mouse.Y)
                             -- Always use Circle FOV
-                            local fovSize = shared.Saved.Fov and shared.Saved.Fov.Size or 150
+                            local fovSize = shared.Story.Fov and shared.Story.Fov.Size or 150
                             local DistanceFromCenterSq = DistanceX^2 + DistanceY^2
                             
                             -- Check if target is within FOV circle (distance from mouse cursor)
@@ -2942,7 +2942,7 @@ end
  
 --[[
 local function CamlockChecksPassed()
-    local checks = shared.Saved.Camlock.Checks
+    local checks = shared.Story.Camlock.Checks
     local camera = workspace.CurrentCamera
     local rightClickHeld = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
  
@@ -2995,8 +2995,8 @@ local function SelectPriority()
     local SelectionRadius = 100
     
     -- Get current mode and checks
-    local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-    local checks = shared.Saved.Selection.Checks[selectionMode] or shared.Saved.Selection.Checks.Auto
+    local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+    local checks = shared.Story.Selection.Checks[selectionMode] or shared.Story.Selection.Checks.Auto
  
     for _, PossiblePriority in pairs(Players:GetPlayers()) do
         if PossiblePriority == LocalPlayer then continue end 
@@ -3034,8 +3034,8 @@ local function SelectPriority()
                 local SelectionRadius = 100
                 
                 -- Get current mode and checks
-                local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-                local checks = shared.Saved.Selection.Checks[selectionMode] or shared.Saved.Selection.Checks.Auto
+                local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+                local checks = shared.Story.Selection.Checks[selectionMode] or shared.Story.Selection.Checks.Auto
             
                 for _, PossiblePriority in pairs(Players:GetPlayers()) do
                     if PossiblePriority == LocalPlayer then continue end 
@@ -3284,14 +3284,14 @@ local SpeedEnabled = false
  
 -- Aim Assist Camera Function
 local function AimAssistCamera()
-    if not shared.Saved['Aim Assist'].Enabled then return end
+    if not shared.Story['Aim Assist'].Enabled then return end
     if not Mango.Locals.AimAssistTarget then return end
     if not Mango.Locals.AimAssistTarget.Character then return end
     
     local Target = Mango.Locals.AimAssistTarget
     local TargetChar = Target.Character
     
-    local checks = shared.Saved.Selection.Checks.Target
+    local checks = shared.Story.Selection.Checks.Target
     if checks.Knocked and Player.IsKnocked(TargetChar) then return end
     if checks.Grabbed and Player.IsGrabbed(TargetChar) then return end
     
@@ -3301,7 +3301,7 @@ local function AimAssistCamera()
     local screenPos = Camera:WorldToViewportPoint(TargetPart.Position)
     local mousePos = UserInputService:GetMouseLocation()
     local distanceFromMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-    local fovSize = shared.Saved.Fov and shared.Saved.Fov.Size or 150
+    local fovSize = shared.Story.Fov and shared.Story.Fov.Size or 150
     
     if distanceFromMouse > fovSize then return end
     
@@ -3309,7 +3309,7 @@ local function AimAssistCamera()
     if HitPosition == Vector3.new(0, 0, 0) then return end
     
     local TargetCFrame = CFrame.new(Camera.CFrame.Position, HitPosition)
-    local Smoothing = shared.Saved['Aim Assist'].Smoothing or 0.5
+    local Smoothing = shared.Story['Aim Assist'].Smoothing or 0.5
     Smoothing = math.clamp(Smoothing, 0.01, 0.99)
     
     Camera.CFrame = Camera.CFrame:Lerp(TargetCFrame, Smoothing)
@@ -3322,9 +3322,9 @@ do
        -- Check if typing in text box
        if UserInputService:GetFocusedTextBox() then return end
  
-local SilentAimKey = Enum.KeyCode[(shared.Saved.Binds['Silent Aim'] or 'C'):upper()]
-local SelectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-local SilentAimMode = shared.Saved.SilentAim.Mode or 'Toggle'
+local SilentAimKey = Enum.KeyCode[(shared.Story.Binds['Silent Aim'] or 'C'):upper()]
+local SelectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+local SilentAimMode = shared.Story.SilentAim.Mode or 'Toggle'
  
 -- Silent Aim Keybind - Handle both Toggle and Hold modes
 if Input.KeyCode == SilentAimKey then
@@ -3334,7 +3334,7 @@ if Input.KeyCode == SilentAimKey then
             if not Mango.Locals.SilentAimTarget then
                 local locked = Player.GetClosestPlayerToCursor()
                 if locked then
-                    local checks = shared.Saved.Selection.Checks.Target
+                    local checks = shared.Story.Selection.Checks.Target
                     local char = locked.Character
                     local isKnocked = char and char:FindFirstChild('BodyEffects') and char.BodyEffects:FindFirstChild('K.O') and char.BodyEffects['K.O'].Value
                     local isGrabbed = char and char:FindFirstChild('GRABBING_CONSTRAINT') ~= nil
@@ -3354,7 +3354,7 @@ if Input.KeyCode == SilentAimKey then
             if not Mango.Locals.SilentAimTarget then
                 local locked = Player.GetClosestPlayerToCursor()
                 if locked then
-                    local checks = shared.Saved.Selection.Checks.Target
+                    local checks = shared.Story.Selection.Checks.Target
                     local char = locked.Character
                     local isKnocked = char and char:FindFirstChild('BodyEffects') and char.BodyEffects:FindFirstChild('K.O') and char.BodyEffects['K.O'].Value
                     local isGrabbed = char and char:FindFirstChild('GRABBING_CONSTRAINT') ~= nil
@@ -3380,21 +3380,21 @@ if Input.KeyCode == SilentAimKey then
 end
  
     -- Get keybinds from Binds table
-    local AimAssistKey = Enum.KeyCode[(shared.Saved.Binds['Aim Assist'] or 'X'):upper()]
-    local TriggerbotKey = Enum.KeyCode[(shared.Saved.Binds.Triggerbot or 'V'):upper()]
-    local ESPKey = Enum.KeyCode[(shared.Saved.Binds.ESP or 'Y'):upper()]
-    local SpeedKey = Enum.KeyCode[(shared.Saved.Binds.Speed or 'Z'):upper()]
+    local AimAssistKey = Enum.KeyCode[(shared.Story.Binds['Aim Assist'] or 'X'):upper()]
+    local TriggerbotKey = Enum.KeyCode[(shared.Story.Binds.Triggerbot or 'V'):upper()]
+    local ESPKey = Enum.KeyCode[(shared.Story.Binds.ESP or 'Y'):upper()]
+    local SpeedKey = Enum.KeyCode[(shared.Story.Binds.Speed or 'Z'):upper()]
  
     -- Aim Assist Keybind - Toggle/Hold lock on/off
     if Input.KeyCode == AimAssistKey then
-        local AimAssistMode = shared.Saved['Aim Assist'].Mode or 'Toggle'
+        local AimAssistMode = shared.Story['Aim Assist'].Mode or 'Toggle'
         
         if AimAssistMode == 'Hold' then
             -- Hold mode: Lock while key is held
             if not Mango.Locals.AimAssistTarget then
                 local locked = Player.GetClosestPlayerToCursor()
                 if locked then
-                    local checks = shared.Saved.Selection.Checks.Target
+                    local checks = shared.Story.Selection.Checks.Target
                     local char = locked.Character
                     local isKnocked = char and char:FindFirstChild('BodyEffects') and char.BodyEffects:FindFirstChild('K.O') and char.BodyEffects['K.O'].Value
                     local isGrabbed = char and char:FindFirstChild('GRABBING_CONSTRAINT') ~= nil
@@ -3413,7 +3413,7 @@ end
             if not Mango.Locals.AimAssistTarget then
                 local locked = Player.GetClosestPlayerToCursor()
                 if locked then
-                    local checks = shared.Saved.Selection.Checks.Target
+                    local checks = shared.Story.Selection.Checks.Target
                     local char = locked.Character
                     local isKnocked = char and char:FindFirstChild('BodyEffects') and char.BodyEffects:FindFirstChild('K.O') and char.BodyEffects['K.O'].Value
                     local isGrabbed = char and char:FindFirstChild('GRABBING_CONSTRAINT') ~= nil
@@ -3434,7 +3434,7 @@ end
  
     -- Triggerbot Keybind - Toggle/Hold
     if Input.KeyCode == TriggerbotKey then
-        local TriggerbotMode = shared.Saved.Triggerbot.Mode or 'Hold'
+        local TriggerbotMode = shared.Story.Triggerbot.Mode or 'Hold'
         if TriggerbotMode == 'Toggle' then
             TriggerbotActive = not TriggerbotActive
         else
@@ -3457,9 +3457,9 @@ end)
     Utility.Connection(UserInputService.InputEnded, function(Input, Processed)
         if UserInputService:GetFocusedTextBox() then return end
         
-        local SilentAimKey = Enum.KeyCode[(shared.Saved.Binds['Silent Aim'] or 'C'):upper()]
-        local SelectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-        local SilentAimMode = shared.Saved.SilentAim.Mode or 'Toggle'
+        local SilentAimKey = Enum.KeyCode[(shared.Story.Binds['Silent Aim'] or 'C'):upper()]
+        local SelectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+        local SilentAimMode = shared.Story.SilentAim.Mode or 'Toggle'
         
         -- In Hold mode, unlock target when key is released
         if Input.KeyCode == SilentAimKey and SelectionMode == "Target" and SilentAimMode == 'Hold' then
@@ -3468,23 +3468,23 @@ end)
         end
         
         -- Aim Assist Hold mode release
-        local AimAssistKey = Enum.KeyCode[(shared.Saved.Binds['Aim Assist'] or 'X'):upper()]
-        local AimAssistMode = shared.Saved['Aim Assist'].Mode or 'Toggle'
+        local AimAssistKey = Enum.KeyCode[(shared.Story.Binds['Aim Assist'] or 'X'):upper()]
+        local AimAssistMode = shared.Story['Aim Assist'].Mode or 'Toggle'
         if Input.KeyCode == AimAssistKey and AimAssistMode == 'Hold' then
             Mango.Locals.AimAssistTarget = nil
         end
         
         -- Triggerbot Hold mode release
-        local TriggerbotKey = Enum.KeyCode[(shared.Saved.Binds.Triggerbot or 'V'):upper()]
-        local TriggerbotMode = shared.Saved.Triggerbot.Mode or 'Hold'
+        local TriggerbotKey = Enum.KeyCode[(shared.Story.Binds.Triggerbot or 'V'):upper()]
+        local TriggerbotMode = shared.Story.Triggerbot.Mode or 'Hold'
         if Input.KeyCode == TriggerbotKey and TriggerbotMode == 'Hold' then
             TriggerbotActive = false
         end
     end)
     -- Triggerbot Logic - Shoot when cursor is directly ON a person
     Utility.ThreadLoop(0, function()
-        if shared.Saved.Triggerbot.Enabled and TriggerbotActive then
-            local delay = shared.Saved.Triggerbot.Delay or 0.01
+        if shared.Story.Triggerbot.Enabled and TriggerbotActive then
+            local delay = shared.Story.Triggerbot.Delay or 0.01
             
             -- Check if we can shoot (delay)
             if tick() - LastTriggerbotShot < delay then return end
@@ -3507,7 +3507,7 @@ end)
                     local hitPlayer = Players:GetPlayerFromCharacter(hitModel)
                     if hitPlayer and hitPlayer ~= Self then
                         local char = hitModel
-                        local checks = shared.Saved.Selection.Checks.Auto
+                        local checks = shared.Story.Selection.Checks.Auto
                         local isKnocked = char:FindFirstChild('BodyEffects') and char.BodyEffects:FindFirstChild('K.O') and char.BodyEffects['K.O'].Value
                         local isGrabbed = char:FindFirstChild('GRABBING_CONSTRAINT') ~= nil
                         
@@ -3516,7 +3516,7 @@ end)
                         if checks.Grabbed and isGrabbed then return end
                         
                         -- Distance Check for Triggerbot
-                        local distanceConfig = shared.Saved['Distance Check']
+                        local distanceConfig = shared.Story['Distance Check']
                         if distanceConfig and distanceConfig.Enabled then
                             local maxDistance = distanceConfig['Max Distance'] or 300
                             local targetHRP = char:FindFirstChild('HumanoidRootPart')
@@ -3533,7 +3533,7 @@ end)
                         local Tool = Self.Character:FindFirstChildWhichIsA('Tool')
                         if Tool and Tool:FindFirstChild('Ammo') then
                             -- Check weapon configuration if enabled
-                            local weaponConfig = shared.Saved.Triggerbot['Weapon Configuration']
+                            local weaponConfig = shared.Story.Triggerbot['Weapon Configuration']
                             if weaponConfig and weaponConfig.Enabled then
                                 local gunList = weaponConfig.Gun or {}
                                 local gunAllowed = false
@@ -3561,7 +3561,7 @@ end)
     
     -- Apply Headless/Anti Trip with retry logic
     local function ApplyVisualMods(char)
-        local speedConfig = shared.Saved['Speed Modification']
+        local speedConfig = shared.Story['Speed Modification']
         if not speedConfig or not speedConfig.Enabled then return end
         
         -- Headless (make head invisible) - run multiple times to catch late loading
@@ -3612,7 +3612,7 @@ end)
     
     -- Main speed loop - runs every frame like user's example
     Utility.Connection(RunService.RenderStepped, function()
-        local speedConfig = shared.Saved['Speed Modification']
+        local speedConfig = shared.Story['Speed Modification']
         -- Check if enabled in config AND toggled on via keybind
         if not speedConfig or not speedConfig.Enabled then return end
         if not SpeedEnabled then 
@@ -3671,7 +3671,7 @@ end)
     
     -- Hitbox Expander - Make enemy hitboxes bigger
     Utility.ThreadLoop(0.5, function()
-        local hitboxConfig = shared.Saved['Hitbox Expander']
+        local hitboxConfig = shared.Story['Hitbox Expander']
         if not hitboxConfig or not hitboxConfig.Enabled then return end
         
         local sizeConfig = hitboxConfig.Size or { X = 5, Y = 5, Z = 5 }
@@ -4056,7 +4056,7 @@ end)
         if not tool:IsA("Tool") or tool:GetAttribute("GlorySkinSetup") then return end
         tool:SetAttribute("GlorySkinSetup", true)
  
-        local skinConfig = shared.Saved['Skin Changer']
+        local skinConfig = shared.Story['Skin Changer']
         if not skinConfig or not skinConfig.Enabled then return end
  
         local skinName = skinConfig.Skins and skinConfig.Skins[tool.Name]
@@ -4136,7 +4136,7 @@ Utility.Connection(RunService.PreRender, LPH_NO_VIRTUALIZE(function()
             Mango.Locals.LockedTarget     = nil
             Mango.Locals.HitPosition      = nil
             -- Only reset SP in Target mode, keep it always true in Auto mode
-            local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
+            local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
             if selectionMode == 'Target' then
                 SP = false
             end
@@ -4147,8 +4147,8 @@ Utility.Connection(RunService.PreRender, LPH_NO_VIRTUALIZE(function()
         if Mango.Locals.SilentAimTarget then
             local char = Mango.Locals.SilentAimTarget.Character
             -- Get current mode and checks
-            local selectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-            local checks = shared.Saved.Selection.Checks[selectionMode] or shared.Saved.Selection.Checks.Auto
+            local selectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+            local checks = shared.Story.Selection.Checks[selectionMode] or shared.Story.Selection.Checks.Auto
             
             if not char or not char.Parent or IsDead(char) or 
                (checks.Knocked and IsKnocked(char)) or 
@@ -4162,8 +4162,8 @@ Utility.Connection(RunService.PreRender, LPH_NO_VIRTUALIZE(function()
     FullAutoUntarget() -- ← This runs every frame
  
     -- Auto Mode: Always ON - automatically acquire closest target every frame
-    local SelectionMode = shared.Saved.Selection['Selection Mode'] or 'Auto'
-    if SelectionMode == 'Auto' and shared.Saved.SilentAim.Enabled then
+    local SelectionMode = shared.Story.Selection['Selection Mode'] or 'Auto'
+    if SelectionMode == 'Auto' and shared.Story.SilentAim.Enabled then
         -- Auto mode is always active (SP is always true)
         local closest = Player.GetClosestPlayerToCursor()
         if closest then
@@ -4185,7 +4185,7 @@ Utility.Connection(RunService.PreRender, LPH_NO_VIRTUALIZE(function()
     AimAssistCamera()
     
     -- ESP Logic
-    local espConfig = shared.Saved.ESP
+    local espConfig = shared.Story.ESP
     if espConfig and espConfig.Enabled then
         -- ESP storage
         if not Mango.Locals.ESPData then
@@ -4277,7 +4277,7 @@ Utility.Connection(RunService.PreRender, LPH_NO_VIRTUALIZE(function()
 end))
  
 Utility.Connection(RunService.PreRender, LPH_NO_VIRTUALIZE(function()
-    if shared.Saved.SilentAim.Enabled and CurrentGame.Name == "Da Hood" then
+    if shared.Story.SilentAim.Enabled and CurrentGame.Name == "Da Hood" then
         local GunType = Main.GetGunCategory()
         local Tool = Self.Character:FindFirstChildWhichIsA("Tool")
         if Tool then
@@ -4344,7 +4344,7 @@ end
  
  
  
-if shared.Saved.SilentAim.Enabled then
+if shared.Story.SilentAim.Enabled then
     local Connections = {}
     local function connectTool(tool)
         if tool:IsA("Tool") and not Connections[tool] then
