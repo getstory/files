@@ -1,4 +1,4 @@
-local Config = shared.Glory
+local Config = shared.Accuracy
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -16,6 +16,8 @@ local SpeedEnabled = false
 local BaseSpeed = 16
 local lastVisibleTarget = nil
 local lastTriggerClick = 0
+local superJumpActive = false
+local guiVisible = true  -- tracks on-screen text display visibility
 
 local function elasticOut(t)
     local p = 0.3
@@ -27,22 +29,16 @@ local function sineInOut(t)
 end
 
 local function isPlayerKnockedOrKO(player)
-    if not Config['Settings']['Knock Check'] then
-        return false
-    end
+    if not Config['Settings']['Knock Check'] then return false end
     
     if player.Character then
         local bodyEffects = player.Character:FindFirstChild("BodyEffects")
         if bodyEffects then
             local ko = bodyEffects:FindFirstChild("K.O")
-            if ko and ko.Value == true then
-                return true
-            end
+            if ko and ko.Value == true then return true end
             
             local knocked = bodyEffects:FindFirstChild("Knocked")
-            if knocked and knocked.Value == true then
-                return true
-            end
+            if knocked and knocked.Value == true then return true end
         end
     end
     
@@ -54,27 +50,36 @@ local function isSelfKnocked()
         local bodyEffects = LocalPlayer.Character:FindFirstChild("BodyEffects")
         if bodyEffects then
             local ko = bodyEffects:FindFirstChild("K.O")
-            if ko and ko.Value == true then
-                return true
-            end
+            if ko and ko.Value == true then return true end
             
             local knocked = bodyEffects:FindFirstChild("Knocked")
-            if knocked and knocked.Value == true then
-                return true
-            end
+            if knocked and knocked.Value == true then return true end
         end
     end
     return false
 end
 
 local function canSeeTarget(part)
-    if not Config['Settings']['Visible Check'] then
-        return true
-    end
+    if not Config['Settings']['Visible Check'] then return true end
     
     if not part or not part.Parent then return false end
     
     local character = part.Parent
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return false end
+    
+    local state = humanoid:GetState()
+    local isAirborne = (state == Enum.HumanoidStateType.Jumping or 
+                        state == Enum.HumanoidStateType.Freefall or 
+                        state == Enum.HumanoidStateType.FallingDown)
+    
+    local root = character:FindFirstChild("HumanoidRootPart")
+    local velY = root and math.abs((root.AssemblyLinearVelocity or root.Velocity or Vector3.new()).Y) or 0
+    
+    if (isAirborne or velY > 8) and isLocking then
+        return true
+    end
+    
     local origin = Camera.CFrame.Position
     local direction = (part.Position - origin).Unit * (part.Position - origin).Magnitude
     
@@ -84,7 +89,6 @@ local function canSeeTarget(part)
     raycastParams.IgnoreWater = true
     
     local rayResult = Workspace:Raycast(origin, direction, raycastParams)
-    
     return rayResult == nil or rayResult.Instance:IsDescendantOf(character)
 end
 
@@ -175,7 +179,6 @@ local function findClosestTarget()
                 if targetPart and canSeeTarget(targetPart) then
                     local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
                     
-                    
                     if isMouseInFOV(player.Character) then
                         local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
                         local dist = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
@@ -199,7 +202,6 @@ local function getPredictedPosition(part, config)
     local velocity = part.AssemblyLinearVelocity or part.Velocity or Vector3.new(0, 0, 0)
     local prediction = config['Prediction']
     
-    
     if type(prediction) == "table" then
         local predX = prediction['X'] or 0.133
         local predY = prediction['Y'] or 0.133
@@ -207,7 +209,6 @@ local function getPredictedPosition(part, config)
         
         return part.Position + Vector3.new(velocity.X * predX, velocity.Y * predY, velocity.Z * predZ)
     else
-        
         if prediction == 0 then
             prediction = 0.1245
         end
@@ -335,29 +336,30 @@ end
 local function TriggerBot()
     if not Config['Trigger Bot']['Enabled'] then return end
     if not triggerEnabled then return end
-    if isSelfKnocked() then return end
     
     if tick() - lastTriggerClick < Config['Trigger Bot']['Delay'] then return end
+    
     if not currentTarget then return end
     
     local character = currentTarget.Parent
-    if not character or not character.Parent then return end
+    if not character then return end
     
     local player = Players:GetPlayerFromCharacter(character)
-    if not player or not player.Parent then return end
+    if not player then return end
     
     if isPlayerKnockedOrKO(player) then return end
+    
     if not canSeeTarget(currentTarget) then return end
+    
     if Config['FOV']['Enabled'] and not isMouseInFOV(character) then return end
     
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid or humanoid.Health <= 0 then return end
-    
-    local myChar = LocalPlayer.Character
-    if not myChar then return end
-    
-    local tool = myChar:FindFirstChildOfClass("Tool")
+    local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
     if not tool then return end
+    
+    if Config['Trigger Bot']['Knife Check'] then
+        local isKnife = tool.Name:lower():find("knife") ~= nil
+        if isKnife then return end
+    end
     
     if Config['Trigger Bot']['Specific Weapons']['Enabled'] then
         local weaponValid = false
@@ -378,7 +380,6 @@ end
 local grm = getrawmetatable(game)
 local oldIndex = grm.__index
 setreadonly(grm, false)
-
 grm.__index = function(self, key)
     if not checkcaller() and self == Mouse and Config['Silent Aim']['Enabled'] then
         if key == "Hit" then
@@ -499,7 +500,12 @@ local function refreshESP()
             
             if onScreen and legPos.Z > 0 then
                 esp.nameTag.Position = Vector2.new(legPos.X, legPos.Y + 15)
-                esp.nameTag.Text = player.Name
+                
+                if player.DisplayName and player.DisplayName ~= "" then
+                    esp.nameTag.Text = player.DisplayName
+                else
+                    esp.nameTag.Text = player.Name
+                end
                 
                 if currentTarget and currentTarget.Parent == player.Character then
                     esp.nameTag.Color = Config['Visual Awareness']['Target Color']
@@ -553,6 +559,29 @@ Players.PlayerRemoving:Connect(function(player)
     removeESPFromPlayer(player)
 end)
 
+RunService.Heartbeat:Connect(function()
+    if not Config['Super Jump']['Enabled'] then return end
+    
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    
+    if not humanoid or not rootPart then return end
+    
+    local holdingB = UserInputService:IsKeyDown(Enum.KeyCode[Config['Keybinds']['Super Jump']])
+    
+    if holdingB and (humanoid:GetState() == Enum.HumanoidStateType.Landed or humanoid.FloorMaterial ~= Enum.Material.Air) then
+        rootPart.Velocity = Vector3.new(
+            rootPart.Velocity.X,
+            Config['Super Jump']['Power'],
+            rootPart.Velocity.Z
+        )
+        task.wait(Config['Super Jump']['Cooldown'])
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     if isSelfKnocked() and isLocking then
         currentTarget = nil
@@ -563,25 +592,25 @@ RunService.RenderStepped:Connect(function()
     TriggerBot()
     
     if SpeedEnabled and Config['Speed']['Enabled'] then
-    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
-    if humanoid then
-        local targetSpeed = BaseSpeed * Config['Speed']['Multiplier']
-        
-        if humanoid.WalkSpeed ~= targetSpeed then
-            humanoid.WalkSpeed = targetSpeed
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            local targetSpeed = BaseSpeed * Config['Speed']['Multiplier']
+            
+            if humanoid.WalkSpeed ~= targetSpeed then
+                humanoid.WalkSpeed = targetSpeed
+            end
         end
-    end
-    
-    if Config['Speed']['Anti Fling'] then
-        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            local vel = hrp.Velocity
-            if vel.Y > 50 or vel.Y < -50 then
-                hrp.Velocity = Vector3.new(vel.X, 0, vel.Z)
+        
+        if Config['Speed']['Anti Fling'] then
+            local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local vel = hrp.Velocity
+                if vel.Y > 50 or vel.Y < -50 then
+                    hrp.Velocity = Vector3.new(vel.X, 0, vel.Z)
+                end
             end
         end
     end
-end
     
     if Config['Hitbox Expander']['Enabled'] then
         for _, player in pairs(Players:GetPlayers()) do
@@ -708,27 +737,37 @@ UserInputService.InputBegan:Connect(function(input, processed)
         
         if mode == 'Toggle' then
             triggerEnabled = not triggerEnabled
-            print("Trigger Bot: " .. (triggerEnabled and "ON" or "OFF"))
         elseif mode == 'Hold' then
             triggerEnabled = true
         end
     end
     
     if input.KeyCode == Enum.KeyCode[Config['Keybinds']['Speed']] then
-    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
-    if humanoid then
-        if not SpeedEnabled then
-            BaseSpeed = 16
-            SpeedEnabled = true
-        else
-            humanoid.WalkSpeed = BaseSpeed
-            SpeedEnabled = false
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            if not SpeedEnabled then
+                BaseSpeed = 16
+                SpeedEnabled = true
+            else
+                humanoid.WalkSpeed = BaseSpeed
+                SpeedEnabled = false
+            end
         end
     end
-end
     
     if input.KeyCode == Enum.KeyCode[Config['Keybinds']['ESP']] then
         Config['Visual Awareness']['Enabled'] = not Config['Visual Awareness']['Enabled']
+        print("ESP: " .. (Config['Visual Awareness']['Enabled'] and "ON" or "OFF"))
+    end
+    
+    if input.KeyCode == Enum.KeyCode[Config['Keybinds']['Super Jump']] then
+        superJumpActive = not superJumpActive
+        print("Super Jump: " .. (superJumpActive and "ON" or "OFF"))
+    end
+    
+    if input.KeyCode == Enum.KeyCode[Config['Keybinds']['Toggle GUI']] then
+        guiVisible = not guiVisible
+        print("GUI Text: " .. (guiVisible and "ON" or "OFF"))
     end
 end)
 
@@ -750,11 +789,185 @@ UserInputService.InputEnded:Connect(function(input, processed)
         
         if mode == 'Hold' then
             triggerEnabled = false
-            print("Trigger Bot: OFF")
         end
     end
 end)
 
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
+end)
+local rapidFireActive = false
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        rapidFireActive = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        rapidFireActive = false
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not Config['Rapid Fire']['Enabled'] or not rapidFireActive then return end
+    
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    local tool = character:FindFirstChildOfClass("Tool")
+    if not tool then return end
+    
+    if Config['Rapid Fire']['Specific Weapons']['Enabled'] then
+        local valid = false
+        for _, wName in pairs(Config['Rapid Fire']['Specific Weapons']['Weapons']) do
+            if tool.Name == wName then
+                valid = true
+                break
+            end
+        end
+        if not valid then return end
+    end
+    
+    tool:Activate()
+    task.wait(Config['Rapid Fire']['Delay'])
+end)
+local infRangeActive = false
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    
+    if input.KeyCode == Enum.KeyCode[Config['Infinite Range']['Key']] then
+        infRangeActive = not infRangeActive
+        print("Infinite Range: " .. (infRangeActive and "ON" or "OFF"))
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not Config['Infinite Range']['Enabled'] or not infRangeActive then return end
+    
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    local tool = character:FindFirstChildOfClass("Tool")
+    if not tool then return end
+    
+    local rangeProps = {"Range", "MaxRange", "FireRange", "Distance", "MaxDistance"}
+    
+    for _, propName in pairs(rangeProps) do
+        local rangeValue = tool:FindFirstChild(propName)
+        if rangeValue and rangeValue:IsA("NumberValue") then
+            rangeValue.Value = Config['Infinite Range']['Max Range']
+        end
+        
+        local config = tool:FindFirstChild("Configuration") or tool:FindFirstChild("GunConfig")
+        if config then
+            local r = config:FindFirstChild(propName)
+            if r and r:IsA("NumberValue") then
+                r.Value = Config['Infinite Range']['Max Range']
+            end
+        end
+    end
+end)
+
+
+local gui = Instance.new("ScreenGui")
+gui.Parent = game.CoreGui
+
+local text = Instance.new("TextLabel")
+text.Parent = gui
+
+text.AnchorPoint = Vector2.new(0.5, 1)
+text.Position = UDim2.new(0.5, 0, 1, -110)
+text.Size = UDim2.new(0, 260, 0, 140)
+
+text.BackgroundTransparency = 1
+text.TextXAlignment = Enum.TextXAlignment.Center
+text.TextYAlignment = Enum.TextYAlignment.Bottom
+
+text.Font = Enum.Font.Gotham
+text.TextSize = 15
+text.RichText = true
+
+text.TextStrokeTransparency = 0
+text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+RunService.RenderStepped:Connect(function()
+    if not guiVisible then
+        text.Text = ""
+        return
+    end
+    
+    local lines = {}
+
+    table.insert(lines, '<font color="rgb(255,255,255)">ecco.club</font>')
+
+    if Config["Silent Aim"]["Enabled"] and currentTarget then
+        local character = currentTarget.Parent
+        local player = Players:GetPlayerFromCharacter(character)
+
+        if player and character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+            if humanoid then
+                local health = math.floor(humanoid.Health)
+
+
+local shield = 0
+
+local bodyEffects = character:FindFirstChild("BodyEffects")
+if bodyEffects then
+    local armor = bodyEffects:FindFirstChild("Armor")
+    if armor and armor.Value then
+        shield = math.floor(armor.Value)
+    end
+end
+
+local healthColor = "rgb(50,205,50)"
+local shieldColor = "rgb(135,206,250)"
+
+table.insert(lines,
+    '<font color="rgb(255,255,255)">Health </font>' ..
+    '<font color="'..healthColor..'">'..health..'</font>' ..
+    '<font color="rgb(255,255,255)"> / </font>' ..
+    '<font color="'..shieldColor..'">'..shield..'</font>'
+)
+                local name = (player.DisplayName ~= "" and player.DisplayName) or player.Name
+
+                table.insert(lines,
+                    '<font color="rgb(255,255,255)">Silent Aim </font><font color="rgb(50,205,50)">('..name..')</font>'
+                )
+            end
+        end
+    end
+
+    if triggerEnabled and Config['Trigger Bot']['Enabled'] then
+        if currentTarget then
+            local character = currentTarget.Parent
+            local player = Players:GetPlayerFromCharacter(character)
+            if player then
+                local targetName = (player.DisplayName and player.DisplayName ~= "") and player.DisplayName or player.Name
+                table.insert(lines,
+                    '<font color="rgb(255,255,255)">Trigger Bot </font><font color="rgb(50,205,50)">(' .. targetName .. ')</font>'
+                )
+            end
+        end
+    end
+
+    if infRangeActive then
+        table.insert(lines,
+            '<font color="rgb(255,255,255)">Infinite Range</font>'
+        )
+    end
+
+    if SpeedEnabled then
+        table.insert(lines,
+            '<font color="rgb(255,255,255)">WalkSpeed</font>'
+        )
+    end
+
+    text.Text = table.concat(lines, "\n")
 end)
