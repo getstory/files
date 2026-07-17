@@ -1,50 +1,93 @@
-shared.Story = {
-	['General'] = {
-		['HotKeys'] = {
-			['Target'] = 'C',
-			['Aim Assist'] = 'C',
-			['Silent Aim'] = 'C',
-			['Trigger Bot'] = 'C',
-			['WalkSpeed'] = 'V',
-			['ESP'] = 'T',
-			['Macro'] = '',
-			['Panic Ground'] = 'X',
-		},
+shared.Glory = {
+    ['Settings'] = {
+        ['Target Aim'] = true,
+        ['Knock Check'] = true,
+        ['Visible Check'] = false,
+    },
 
-		["Visuals"] = {
-			["Info"] = {
-				["Enabled"] = false,
-				["Alias"] = "",
+    ['Keybinds'] = {
+        ['Target Lock'] = {
+            ['Key'] = 'F',
+            ['Mode'] = 'Toggle',
+        },
+        ['Trigger Bot'] = {
+            ['Key'] = 'F',
+            ['Mode'] = 'Toggle',
+        },
+        ['Speed'] = 'Q',
+        ['ESP'] = 'E',
+    },
 
-				["Colors"] = {
-					["Story Hue"] = Color3.fromRGB(231, 92, 255),
-					["Color"] = Color3.fromRGB(255, 255, 255),
-					["TargetColor"] = Color3.fromRGB(255, 0, 0)
-				},
+    ['FOV'] = {
+        ['Enabled'] = false,
+        ['Visible'] = true,
+        ['Size'] = Vector2.new(250, 250),
+        ['Thickness'] = 2,
+        ['Color'] = Color3.fromRGB(255, 255, 255),
+    },
 
-				["Position"] = {
-					["Size"] = 285,
-					["X"] = 0.0045,
-					["Y"] = 0.5
-				}
-			},
+    ['Silent Aim'] = {
+        ['Enabled'] = true,
+        ['Hit Part'] = 'Closest Part',
+        ['Use Prediction'] = true,
+        ['Prediction'] = {
+            ['X'] = 0.133,
+            ['Y'] = 0.133,
+            ['Z'] = 0.133,
+        },
+    },
 
-			["ESP"] = {
-				["Enabled"] = false,
-				["Name"] = "Name",
-				["Distance"] = 500,
-				["Color"] = Color3.fromRGB(255, 255, 255),
-				["TargetColor"] = Color3.fromRGB(0, 255, 0),
-				["Size"] = 8
-			}
-		}
-	},
+    ['Camera Lock'] = {
+        ['Enabled'] = true,
+        ['Hit Part'] = 'Closest Part',
+        ['Smoothing'] = 40,
+        ['Use Prediction'] = true,
+        ['Prediction'] = 0.133,
+    },
 
-	['Character'] = {
-		['WalkSpeed'] = {
-			['Enabled'] = true,
-			['Value'] = 50,
-			['Default'] = 16
-		}
-	}
+    ['Trigger Bot'] = {
+        ['Enabled'] = true,
+        ['Delay'] = 0.01,
+        ['Specific Weapons'] = {
+            ['Enabled'] = true,
+            ['Weapons'] = {
+                '[Double-Barrel SG]',
+                '[Revolver]',
+                '[TacticalShotgun]',
+            },
+        },
+    },
+
+    ['Spread'] = {
+        ['Enabled'] = true,
+        ['Amount'] = 1,
+        ['Specific Weapons'] = {
+            ['Enabled'] = false,
+            ['Weapons'] = {
+                '[Double-Barrel SG]',
+                '[TacticalShotgun]',
+            },
+        },
+    },
+
+    ['Speed'] = {
+        ['Enabled'] = true,
+        ['Multiplier'] = 16,
+        ['Anti Fling'] = false,
+    },
+
+    ['Hitbox Expander'] = {
+        ['Enabled'] = false,
+        ['Size'] = 5,
+    },
+
+    ['Spiderman'] = {
+        ['Enabled'] = false,
+    },
+
+    ['Visual Awareness'] = {
+        ['Enabled'] = true,
+        ['Color'] = Color3.fromRGB(255, 255, 255),
+        ['Target Color'] = Color3.fromRGB(255, 0, 0),
+    },
 }
