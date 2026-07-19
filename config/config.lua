@@ -1,4 +1,4 @@
-shared.Accuracy = {
+shared.Story = {
     ['Settings'] = {
         ['Target Aim'] = true,
         ['Knock Check'] = true,
